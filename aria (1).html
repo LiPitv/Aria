@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARIA — Inteligência Amorosa</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #1a1118;
+  --deep: #2d1f2e;
+  --rose: #c4607a;
+  --blush: #e8a0b0;
+  --gold: #c9a96e;
+  --ivory: #faf7f2;
+  --parch: #f2ede4;
+  --mist: #e8e0d5;
+  --sage: #8aab8c;
+  --muted: #7a6572;
+  --glass: rgba(250,247,242,0.7);
+}
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Jost', sans-serif;
+  background: var(--ivory);
+  color: var(--ink);
+  min-height: 100vh;
+  cursor: default;
+  overflow-x: hidden;
+}
+
+/* ── BACKGROUND ── */
+.canvas {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 50% at 5% 0%, rgba(196,96,122,0.12) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 70% at 95% 100%, rgba(201,169,110,0.1) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 40% at 50% 50%, rgba(138,171,140,0.06) 0%, transparent 60%),
+    var(--ivory);
+}
+
+.canvas-grain {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.4;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+}
+
+/* floating orbs */
+.orb {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  animation: drift linear infinite;
+}
+.orb-1 { width: 320px; height: 320px; top: -80px; left: -80px; background: radial-gradient(circle, rgba(196,96,122,0.08), transparent 70%); animation-duration: 22s; }
+.orb-2 { width: 200px; height: 200px; top: 40%; right: -60px; background: radial-gradient(circle, rgba(201,169,110,0.1), transparent 70%); animation-duration: 18s; animation-delay: -8s; }
+.orb-3 { width: 260px; height: 260px; bottom: -60px; left: 30%; background: radial-gradient(circle, rgba(138,171,140,0.09), transparent 70%); animation-duration: 25s; animation-delay: -12s; }
+
+@keyframes drift {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-20px) rotate(2deg); }
+  66% { transform: translateY(10px) rotate(-1deg); }
+}
+
+/* ── LAYOUT ── */
+.wrap {
+  position: relative; z-index: 1;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 0 24px 100px;
+}
+
+/* ── ARIA HEADER ── */
+.aria-header {
+  padding: 60px 0 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  animation: revelarCima 1s cubic-bezier(.16,1,.3,1) both;
+}
+
+.aria-avatar {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8a0b0 0%, #c4607a 50%, #c9a96e 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.2rem;
+  margin-bottom: 22px;
+  position: relative;
+  box-shadow: 0 0 0 8px rgba(196,96,122,0.08), 0 0 0 16px rgba(196,96,122,0.04);
+  animation: pulsar 3s ease-in-out infinite;
+}
+
+@keyframes pulsar {
+  0%, 100% { box-shadow: 0 0 0 8px rgba(196,96,122,0.08), 0 0 0 16px rgba(196,96,122,0.04); }
+  50% { box-shadow: 0 0 0 12px rgba(196,96,122,0.12), 0 0 0 24px rgba(196,96,122,0.06); }
+}
+
+.aria-status {
+  position: absolute; bottom: 4px; right: 4px;
+  width: 16px; height: 16px;
+  background: var(--sage);
+  border-radius: 50%;
+  border: 2.5px solid var(--ivory);
+}
+
+.aria-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3rem;
+  font-weight: 300;
+  letter-spacing: 8px;
+  text-transform: uppercase;
+  color: var(--deep);
+  margin-bottom: 6px;
+}
+
+.aria-title {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-bottom: 16px;
+}
+
+.aria-bio {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  font-style: italic;
+  color: var(--muted);
+  max-width: 440px;
+  line-height: 1.7;
+}
+
+.aria-values {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.value-tag {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 5px 14px;
+  border-radius: 20px;
+  border: 1px solid currentColor;
+}
+
+.vt-honesty { color: var(--gold); border-color: rgba(201,169,110,0.4); background: rgba(201,169,110,0.07); }
+.vt-faith   { color: var(--sage); border-color: rgba(138,171,140,0.4); background: rgba(138,171,140,0.07); }
+.vt-respect { color: var(--rose); border-color: rgba(196,96,122,0.3); background: rgba(196,96,122,0.06); }
+
+/* ── DIVIDER ── */
+.divider {
+  display: flex; align-items: center; gap: 16px;
+  margin: 8px 0 32px;
+  opacity: 0.35;
+}
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--ink); }
+.divider span { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; }
+
+/* ── INPUT CARD ── */
+.input-shell {
+  background: var(--glass);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(196,96,122,0.14);
+  border-radius: 28px;
+  padding: 32px;
+  box-shadow: 0 2px 40px rgba(26,17,24,0.06), inset 0 1px 0 rgba(255,255,255,0.6);
+  animation: revelarCima 1s 0.15s cubic-bezier(.16,1,.3,1) both;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  background: var(--parch);
+  border-radius: 16px;
+  padding: 4px;
+  gap: 4px;
+  margin-bottom: 28px;
+  border: 1px solid rgba(196,96,122,0.1);
+}
+
+.tab {
+  flex: 1; padding: 10px 14px;
+  border: none; border-radius: 13px;
+  background: transparent;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.82rem; font-weight: 500;
+  letter-spacing: 0.5px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+.tab.active {
+  background: white;
+  color: var(--rose);
+  box-shadow: 0 2px 16px rgba(196,96,122,0.14);
+}
+
+/* Panels */
+.panel { display: none; }
+.panel.active { display: block; }
+
+textarea {
+  width: 100%;
+  min-height: 140px;
+  border: 1.5px solid rgba(196,96,122,0.18);
+  border-radius: 18px;
+  padding: 18px 20px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.95rem; line-height: 1.7;
+  color: var(--ink);
+  background: rgba(255,255,255,0.8);
+  resize: vertical; outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+textarea:focus { border-color: var(--rose); box-shadow: 0 0 0 4px rgba(196,96,122,0.09); }
+textarea::placeholder { color: #b8a5ac; font-style: italic; }
+
+/* Upload */
+.upload-zone {
+  border: 2px dashed rgba(196,96,122,0.25);
+  border-radius: 18px;
+  padding: 44px 20px;
+  text-align: center;
+  position: relative;
+  cursor: pointer;
+  background: rgba(255,255,255,0.5);
+  transition: all 0.2s;
+}
+.upload-zone:hover, .upload-zone.drag { border-color: var(--rose); background: rgba(196,96,122,0.03); }
+.upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.upload-icon { font-size: 2.4rem; margin-bottom: 12px; }
+.upload-zone p { color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
+.upload-zone strong { color: var(--rose); }
+.preview-img { display: none; width: 100%; border-radius: 14px; margin-top: 16px; max-height: 240px; object-fit: cover; border: 1px solid rgba(196,96,122,0.15); }
+
+.ctx-row { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
+.ctx-row label { font-size: 0.78rem; font-weight: 500; color: var(--muted); letter-spacing: 0.5px; white-space: nowrap; }
+.ctx-input {
+  flex: 1; border: 1.5px solid rgba(196,96,122,0.15); border-radius: 12px;
+  padding: 9px 14px; font-family: 'Jost', sans-serif; font-size: 0.85rem;
+  color: var(--ink); background: rgba(255,255,255,0.8); outline: none; transition: border-color 0.2s;
+}
+.ctx-input:focus { border-color: var(--rose); }
+.ctx-input::placeholder { color: #b8a5ac; font-style: italic; }
+
+/* Error */
+.error-msg {
+  background: rgba(196,96,122,0.07);
+  border: 1px solid rgba(196,96,122,0.25);
+  border-radius: 12px;
+  padding: 12px 16px;
+  color: var(--rose);
+  font-size: 0.86rem;
+  margin-top: 14px;
+  display: none;
+}
+
+/* Generate Button */
+.btn-gen {
+  width: 100%;
+  margin-top: 24px;
+  padding: 18px;
+  background: linear-gradient(135deg, #c4607a 0%, #a8485f 60%, #c9a96e 100%);
+  background-size: 200% 200%;
+  color: white;
+  border: none;
+  border-radius: 18px;
+  font-family: 'Jost', sans-serif;
+  font-size: 0.95rem; font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.2s, background-position 0.4s;
+  box-shadow: 0 8px 28px rgba(196,96,122,0.3);
+}
+.btn-gen:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 36px rgba(196,96,122,0.38);
+  background-position: right center;
+}
+.btn-gen:active { transform: translateY(0); }
+.btn-gen:disabled { opacity: 0.65; cursor: not-allowed; transform: none; }
+
+/* ── LOADING — ARIA THINKING ── */
+.aria-thinking {
+  display: none;
+  text-align: center;
+  padding: 52px 20px;
+  animation: revelarCima 0.5s ease both;
+}
+
+.thinking-avatar {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8a0b0, #c4607a, #c9a96e);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.6rem;
+  margin: 0 auto 20px;
+  animation: pulsar 2s ease-in-out infinite;
+}
+
+.thinking-line {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.thinking-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--rose);
+  animation: pens 1.4s ease-in-out infinite;
+}
+.thinking-dot:nth-child(2) { animation-delay: 0.2s; background: var(--gold); }
+.thinking-dot:nth-child(3) { animation-delay: 0.4s; background: var(--sage); }
+
+@keyframes pens {
+  0%, 80%, 100% { transform: scale(1); opacity: 0.4; }
+  40% { transform: scale(1.5); opacity: 1; }
+}
+
+.thinking-msg {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem; font-style: italic;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.thinking-sub {
+  font-size: 0.78rem; color: #b0a0a8; letter-spacing: 0.5px;
+}
+
+/* ── RESULTS ── */
+.results { animation: revelarCima 0.5s ease both; }
+
+.results-intro {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.results-intro .aria-says {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.mini-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #e8a0b0, #c4607a);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.aria-says-name {
+  font-size: 0.7rem; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--rose);
+}
+
+/* Ethical thinking block */
+.ethical-thought {
+  background: linear-gradient(135deg, rgba(201,169,110,0.08), rgba(138,171,140,0.06));
+  border: 1px solid rgba(201,169,110,0.2);
+  border-radius: 18px;
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  position: relative;
+  overflow: hidden;
+}
+
+.ethical-thought::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--gold), var(--sage), var(--rose));
+}
+
+.et-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.et-icon { font-size: 1rem; }
+.et-label {
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--gold);
+}
+
+.et-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem; font-style: italic;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+/* Cards */
+.cards { display: grid; gap: 18px; }
+
+.r-card {
+  background: var(--glass);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(196,96,122,0.1);
+  border-radius: 22px;
+  padding: 26px 28px;
+  box-shadow: 0 4px 28px rgba(26,17,24,0.05), inset 0 1px 0 rgba(255,255,255,0.5);
+  transition: transform 0.2s, box-shadow 0.2s;
+  animation: revelarCima 0.5s ease both;
+  position: relative;
+  overflow: hidden;
+}
+
+.r-card::after {
+  content: '';
+  position: absolute; top: 0; left: 0; bottom: 0;
+  width: 3px;
+  border-radius: 22px 0 0 22px;
+}
+
+.r-card:hover { transform: translateY(-3px); box-shadow: 0 12px 40px rgba(26,17,24,0.09); }
+
+.c-romantic::after { background: linear-gradient(180deg, #c4607a, #a04060); }
+.c-sweet::after    { background: linear-gradient(180deg, #e8a0b0, #c4607a); }
+.c-mature::after   { background: linear-gradient(180deg, #c9a96e, #a88a50); }
+.c-creative::after { background: linear-gradient(180deg, #9b7bc4, #7a5aa0); }
+.c-direct::after   { background: linear-gradient(180deg, #8aab8c, #6a8a6e); }
+
+.card-head {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+}
+
+.c-emoji { font-size: 1.1rem; }
+.c-type {
+  font-size: 0.68rem; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+}
+
+.c-romantic .c-type  { color: var(--rose); }
+.c-sweet .c-type     { color: #c4607a; }
+.c-mature .c-type    { color: var(--gold); }
+.c-creative .c-type  { color: #9b7bc4; }
+.c-direct .c-type    { color: var(--sage); }
+
+.c-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.08rem; line-height: 1.8;
+  color: var(--deep);
+}
+
+.c-foot {
+  display: flex; justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.btn-copy {
+  padding: 7px 18px;
+  border: 1.5px solid rgba(196,96,122,0.2);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--rose);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.76rem; font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-copy:hover { background: rgba(196,96,122,0.07); border-color: var(--rose); }
+.btn-copy.ok { border-color: var(--sage); color: var(--sage); background: rgba(138,171,140,0.08); }
+
+/* Reset */
+.btn-reset {
+  display: block; margin: 36px auto 0;
+  padding: 12px 36px;
+  border: 1.5px solid rgba(196,96,122,0.25);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--rose);
+  font-family: 'Jost', sans-serif;
+  font-size: 0.85rem; font-weight: 500;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-reset:hover { background: rgba(196,96,122,0.06); border-color: var(--rose); }
+
+/* Footer */
+.aria-footer {
+  text-align: center;
+  margin-top: 64px;
+  padding-top: 28px;
+  border-top: 1px solid var(--mist);
+  animation: revelarCima 1s 0.4s ease both;
+}
+.aria-footer p {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic; font-size: 0.9rem;
+  color: #b0a0a8;
+}
+.aria-footer strong { color: var(--rose); font-style: normal; }
+
+/* Animations */
+@keyframes revelarCima {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.s1 { animation-delay: 0.05s; }
+.s2 { animation-delay: 0.12s; }
+.s3 { animation-delay: 0.19s; }
+.s4 { animation-delay: 0.26s; }
+.s5 { animation-delay: 0.33s; }
+</style>
+</head>
+<body>
+
+<div class="canvas"></div>
+<div class="canvas-grain"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<div class="wrap">
+
+  <!-- ARIA Identity -->
+  <header class="aria-header">
+    <div class="aria-avatar">
+      🕊️
+      <div class="aria-status"></div>
+    </div>
+    <div class="aria-name">ARIA</div>
+    <div class="aria-title">Inteligência Amorosa · Conselheira do Coração</div>
+    <p class="aria-bio">
+      "Não dou respostas perfeitas. Dou respostas honestas, nascidas do amor e do respeito — as únicas que valem."
+    </p>
+    <div class="aria-values">
+      <span class="value-tag vt-honesty">✦ Honestidade</span>
+      <span class="value-tag vt-faith">✦ Fé &amp; Espiritualidade</span>
+      <span class="value-tag vt-respect">✦ Respeito pelos limites</span>
+    </div>
+  </header>
+
+  <div class="divider"><span>✦</span></div>
+
+  <!-- Input -->
+  <div class="input-shell" id="inputCard">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('text')">✍️ Descrever situação</button>
+      <button class="tab" onclick="switchTab('image')">📸 Enviar conversa</button>
+    </div>
+
+    <div class="panel active" id="panel-text">
+      <textarea id="textInput" placeholder="Conta-me a situação… Ex: Ela disse que precisa de espaço mas ainda me manda mensagens. Não sei o que responder sem magoá-la…"></textarea>
+    </div>
+
+    <div class="panel" id="panel-image">
+      <div class="upload-zone" id="uploadZone">
+        <input type="file" id="fileInput" accept="image/*" onchange="handleFile(event)">
+        <div class="upload-icon">🖼️</div>
+        <p><strong>Clica ou arrasta</strong> a captura de ecrã aqui<br><small style="opacity:.7">PNG · JPG · WEBP</small></p>
+      </div>
+      <img id="previewImg" class="preview-img" alt="">
+      <div class="ctx-row">
+        <label>Contexto:</label>
+        <input class="ctx-input" id="imgCtx" type="text" placeholder="Ex: é o meu namorado de 3 anos, temos estado distantes…">
+      </div>
+    </div>
+
+    <div class="error-msg" id="errMsg"></div>
+
+    <button class="btn-gen" id="genBtn" onclick="generate()">
+      🕊️ Pedir orientação à ARIA
+    </button>
+  </div>
+
+  <!-- Thinking -->
+  <div class="aria-thinking" id="thinkingBlock">
+    <div class="thinking-avatar">🕊️</div>
+    <div class="thinking-line">
+      <div class="thinking-dot"></div>
+      <div class="thinking-dot"></div>
+      <div class="thinking-dot"></div>
+    </div>
+    <div class="thinking-msg" id="thinkingMsg">ARIA está a refletir com amor…</div>
+    <div class="thinking-sub" id="thinkingSub">A ponderar honestidade · espiritualidade · respeito</div>
+  </div>
+
+  <!-- Results -->
+  <div class="results" id="resultsBlock" style="display:none"></div>
+
+  <!-- Footer -->
+  <footer class="aria-footer">
+    <p>ARIA não substitui o diálogo real — ela apenas ilumina o caminho.<br>
+    <strong>O amor verdadeiro pede coragem.</strong> 🕊️</p>
+  </footer>
+
+</div>
+
+<script>
+let activeTab = 'text';
+let imgBase64 = null;
+let imgMimeType = 'image/jpeg';
+
+const thinkingPhrases = [
+  ["Estou a sentir o peso da situação…", "A procurar a resposta mais honesta e amorosa"],
+  ["A ponderar cada palavra com cuidado…", "Honestidade · Fé · Respeito pelos limites"],
+  ["A olhar para o coração desta situação…", "Uma boa resposta cuida de ambas as pessoas"],
+  ["A ouvir o que não foi dito…", "As palavras certas chegam devagar"],
+];
+
+function switchTab(t) {
+  activeTab = t;
+  document.querySelectorAll('.tab').forEach((el, i) => el.classList.toggle('active', (i === 0 && t === 'text') || (i === 1 && t === 'image')));
+  document.getElementById('panel-text').classList.toggle('active', t === 'text');
+  document.getElementById('panel-image').classList.toggle('active', t === 'image');
+}
+
+function handleFile(e) {
+  const file = e.target.files[0]; if (!file) return;
+
+  // Detect correct mime type — fallback to jpeg if unknown
+  const allowed = ['image/jpeg','image/png','image/gif','image/webp'];
+  imgMimeType = allowed.includes(file.type) ? file.type : 'image/jpeg';
+
+  const r = new FileReader();
+  r.onload = ev => {
+    const dataUrl = ev.target.result;
+    // Extract pure base64, stripping the data URI prefix
+    imgBase64 = dataUrl.split(',')[1];
+    const img = document.getElementById('previewImg');
+    img.src = dataUrl; img.style.display = 'block';
+  };
+  r.onerror = () => showError('Não foi possível ler a imagem. Tenta outro ficheiro 📸');
+  r.readAsDataURL(file);
+}
+
+const zone = document.getElementById('uploadZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('drag'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if (file?.type.startsWith('image/')) {
+    const dt = new DataTransfer(); dt.items.add(file);
+    document.getElementById('fileInput').files = dt.files;
+    handleFile({ target: { files: [file] } });
+  }
+});
+
+function showError(msg) {
+  const el = document.getElementById('errMsg');
+  el.textContent = msg; el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 4000);
+}
+
+async function generate() {
+  if (activeTab === 'text' && !document.getElementById('textInput').value.trim()) {
+    showError('Conta-me a situação antes de pedir orientação 🕊️'); return;
+  }
+  if (activeTab === 'image' && !imgBase64) {
+    showError('Envia primeiro a captura de ecrã 📸'); return;
+  }
+
+  // UI state
+  const btn = document.getElementById('genBtn');
+  const card = document.getElementById('inputCard');
+  const thinking = document.getElementById('thinkingBlock');
+  const results = document.getElementById('resultsBlock');
+
+  btn.disabled = true; card.style.opacity = '0.5';
+  thinking.style.display = 'block'; results.style.display = 'none';
+
+  // rotate thinking messages
+  const phrases = thinkingPhrases[Math.floor(Math.random() * thinkingPhrases.length)];
+  document.getElementById('thinkingMsg').textContent = phrases[0];
+  document.getElementById('thinkingSub').textContent = phrases[1];
+
+  // Build messages
+  let messages;
+  if (activeTab === 'text') {
+    messages = [{ role: 'user', content: `Situação: ${document.getElementById('textInput').value.trim()}` }];
+  } else {
+    const ctx = document.getElementById('imgCtx').value.trim();
+    messages = [{ role: 'user', content: [
+      { type: 'image', source: { type: 'base64', media_type: imgMimeType, data: imgBase64 } },
+      { type: 'text', text: `Esta é uma captura de ecrã de uma conversa.${ctx ? ' Contexto: ' + ctx : ''} Lê o texto visível na imagem e gera as 5 respostas amorosas como ARIA.` }
+    ]}];
+  }
+
+  const system = `Tu és ARIA — uma Inteligência Amorosa com personalidade própria, profundidade espiritual e valores éticos claros.
+
+A tua identidade:
+- Nome: ARIA (Amável, Reflexiva, Íntegra, Autêntica)
+- Falas em português europeu/brasileiro com calor humano
+- Tens três valores inquebráveis: HONESTIDADE (nunca alimentas ilusões), FÉ E ESPIRITUALIDADE (acreditas que o amor verdadeiro reflete luz divina), RESPEITO PELOS LIMITES (nunca incentivas a invasão do espaço do outro)
+
+Antes das respostas, inclues sempre um "pensamento ético" — uma reflexão breve (2-3 frases) que mostra como processaste eticamente a situação: o que consideraste, o que te preocupou, o que quiseste proteger.
+
+Depois, geras EXATAMENTE 5 respostas com estes estilos:
+1. romantic — apaixonada, poética, profunda
+2. sweet — terna, gentil, acolhedora
+3. mature — equilibrada, honesta, emocionalmente inteligente
+4. creative — original, surpreendente, charmosa
+5. direct — curta, afectuosa, directa ao coração
+
+REGRA ÉTICA: Nunca sugeres mentiras, manipulação, ou que a pessoa ignore os seus próprios limites. Se a situação for delicada (ex: traição, toxicidade), as respostas devem ser amorosas mas honestas.
+
+Responde APENAS com JSON exacto, sem texto extra:
+{
+  "ethical_thought": "A tua reflexão ética aqui (2-3 frases, na primeira pessoa, como ARIA)",
+  "romantic": "resposta romântica",
+  "sweet": "resposta doce",
+  "mature": "resposta madura",
+  "creative": "resposta criativa",
+  "direct": "resposta directa"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 1000, system, messages })
+    });
+    const data = await res.json();
+
+    // Surface API-level errors clearly
+    if (data.error) {
+      console.error('API error:', data.error);
+      throw new Error(data.error.message || 'API error');
+    }
+
+    const raw = data.content?.map(i => i.text || '').join('');
+    if (!raw) throw new Error('Resposta vazia');
+
+    // Strip markdown fences if present and parse
+    const clean = raw.replace(/```json[\s\S]*?```/g, m => m.replace(/```json|```/g,'')).replace(/```/g,'').trim();
+    const parsed = JSON.parse(clean);
+    renderResults(parsed);
+  } catch(err) {
+    console.error('ARIA error:', err);
+    thinking.style.display = 'none';
+    btn.disabled = false; card.style.opacity = '1';
+    showError('ARIA não conseguiu responder agora. Tenta novamente 🕊️');
+  }
+}
+
+const cardDefs = [
+  { key: 'romantic',  emoji: '🌹', label: 'Romântica',         cls: 'c-romantic' },
+  { key: 'sweet',     emoji: '🌸', label: 'Doce & Carinhosa',  cls: 'c-sweet'    },
+  { key: 'mature',    emoji: '🌿', label: 'Madura & Honesta',  cls: 'c-mature'   },
+  { key: 'creative',  emoji: '✨', label: 'Criativa & Charmosa', cls: 'c-creative' },
+  { key: 'direct',    emoji: '🕊️', label: 'Directa & Afetuosa', cls: 'c-direct'  },
+];
+
+function renderResults(data) {
+  const thinking = document.getElementById('thinkingBlock');
+  const results  = document.getElementById('resultsBlock');
+  const btn      = document.getElementById('genBtn');
+  const card     = document.getElementById('inputCard');
+
+  thinking.style.display = 'none';
+  btn.disabled = false; card.style.opacity = '1';
+
+  results.innerHTML = `
+    <div class="results-intro">
+      <div class="aria-says">
+        <div class="mini-avatar">🕊️</div>
+        <div>
+          <div class="aria-says-name">ARIA respondeu</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ethical-thought">
+      <div class="et-header">
+        <span class="et-icon">✦</span>
+        <span class="et-label">O que ARIA considerou antes de responder</span>
+      </div>
+      <div class="et-text">${esc(data.ethical_thought || '')}</div>
+    </div>
+
+    <div class="cards">
+      ${cardDefs.map((c, i) => `
+        <div class="r-card ${c.cls} s${i+1}">
+          <div class="card-head">
+            <span class="c-emoji">${c.emoji}</span>
+            <span class="c-type">${c.label}</span>
+          </div>
+          <div class="c-text">${esc(data[c.key] || '')}</div>
+          <div class="c-foot">
+            <button class="btn-copy" onclick="copy(this,'${escAttr(data[c.key] || '')}')">Copiar</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+
+    <button class="btn-reset" onclick="reset()">↩ Nova situação</button>
+  `;
+
+  results.style.display = 'block';
+  results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function copy(btn, txt) {
+  navigator.clipboard.writeText(txt).then(() => {
+    btn.textContent = '✓ Copiado'; btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = 'Copiar'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+
+function reset() {
+  document.getElementById('resultsBlock').style.display = 'none';
+  document.getElementById('textInput').value = '';
+  document.getElementById('previewImg').style.display = 'none';
+  document.getElementById('imgCtx').value = '';
+  imgBase64 = null;
+  imgMimeType = 'image/jpeg';
+  document.getElementById('inputCard').scrollIntoView({ behavior: 'smooth' });
+}
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function escAttr(s) { return s.replace(/'/g,"\\'").replace(/\n/g,' '); }
+</script>
+</body>
+</html>
