@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ARIA v2 — Inteligência Amorosa</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0e0a12; --surface:#17111f; --card:#1e1529; --border:rgba(255,255,255,0.07);
+  --border-glow:rgba(220,120,160,0.25); --rose:#e8607a; --rose-soft:#c4607a;
+  --pink:#f0a0b8; --gold:#e0b870; --sage:#78b890; --lavender:#a888d8;
+  --text:#f0e8f0; --muted:#8878a0; --dim:#4a3858;
+  --font:'Plus Jakarta Sans',sans-serif; --serif:'Instrument Serif',serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;} html{scroll-behavior:smooth;}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+.bg-mesh{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 60% 50% at 10% 10%,rgba(232,96,122,0.12) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 90% 80%,rgba(168,136,216,0.1) 0%,transparent 60%),var(--bg);}
+.bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.03;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:40px 40px;}
+.wrap{position:relative;z-index:1;max-width:680px;margin:0 auto;padding:0 20px 100px;}
+
+/* HEADER */
+header{padding:52px 0 40px;text-align:center;animation:up 0.8s cubic-bezier(.16,1,.3,1) both;}
+.aria-ring{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#e8607a,#a888d8,#e0b870);display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 20px;position:relative;animation:breathe 4s ease-in-out infinite;}
+.aria-ring::before{content:'';position:absolute;inset:-3px;border-radius:50%;background:linear-gradient(135deg,#e8607a,#a888d8,#e0b870);z-index:-1;animation:spin 6s linear infinite;mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#fff 0);-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 3px),#fff 0);}
+@keyframes spin{to{transform:rotate(360deg);}}
+@keyframes breathe{0%,100%{box-shadow:0 0 30px rgba(232,96,122,0.25);}50%{box-shadow:0 0 60px rgba(232,96,122,0.45),0 0 100px rgba(168,136,216,0.2);}}
+.online-dot{position:absolute;bottom:3px;right:3px;width:14px;height:14px;background:var(--sage);border-radius:50%;border:2px solid var(--bg);box-shadow:0 0 8px var(--sage);}
+.aria-name{font-family:var(--serif);font-size:2.6rem;letter-spacing:6px;text-transform:uppercase;background:linear-gradient(135deg,#e8607a,#f0a0b8,#a888d8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:6px;}
+.aria-sub{font-size:0.72rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--muted);margin-bottom:14px;}
+.aria-quote{font-family:var(--serif);font-style:italic;font-size:0.98rem;color:var(--muted);max-width:380px;margin:0 auto 18px;line-height:1.7;}
+.badges{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
+.badge{font-size:0.68rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:20px;border:1px solid;}
+.b-rose{color:var(--rose);border-color:rgba(232,96,122,0.35);background:rgba(232,96,122,0.08);}
+.b-gold{color:var(--gold);border-color:rgba(224,184,112,0.35);background:rgba(224,184,112,0.08);}
+.b-sage{color:var(--sage);border-color:rgba(120,184,144,0.35);background:rgba(120,184,144,0.08);}
+.b-lav{color:var(--lavender);border-color:rgba(168,136,216,0.35);background:rgba(168,136,216,0.08);}
+
+/* PANELS */
+.panel-card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;margin-bottom:16px;animation:up 0.8s cubic-bezier(.16,1,.3,1) both;}
+.step-label{font-size:0.72rem;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.name-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.name-field{display:flex;flex-direction:column;gap:6px;}
+.name-field label{font-size:0.75rem;font-weight:500;color:var(--muted);}
+input[type=text]{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:12px;padding:12px 16px;font-family:var(--font);font-size:0.9rem;color:var(--text);outline:none;transition:all 0.2s;width:100%;}
+input[type=text]:focus{border-color:var(--rose-soft);background:rgba(232,96,122,0.05);box-shadow:0 0 0 3px rgba(232,96,122,0.1);}
+input[type=text]::placeholder{color:var(--dim);font-style:italic;}
+
+/* TYPE GRID */
+.type-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.type-btn{padding:14px 12px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,0.03);cursor:pointer;transition:all 0.2s;text-align:left;display:flex;flex-direction:column;gap:4px;}
+.type-btn:hover{border-color:rgba(232,96,122,0.3);background:rgba(232,96,122,0.06);}
+.type-btn.active{border-color:var(--rose-soft);background:rgba(232,96,122,0.1);box-shadow:0 0 20px rgba(232,96,122,0.1);}
+.type-emoji{font-size:1.3rem;}
+.type-name{font-size:0.82rem;font-weight:600;color:var(--text);}
+.type-desc{font-size:0.72rem;color:var(--muted);line-height:1.4;}
+
+/* INPUT */
+.tabs{display:flex;background:rgba(255,255,255,0.04);border-radius:12px;padding:4px;gap:4px;margin-bottom:20px;}
+.tab{flex:1;padding:9px;border:none;border-radius:9px;background:transparent;font-family:var(--font);font-size:0.8rem;font-weight:500;color:var(--muted);cursor:pointer;transition:all 0.2s;}
+.tab.active{background:rgba(232,96,122,0.15);color:var(--rose);}
+.panel{display:none;} .panel.active{display:block;}
+textarea{width:100%;min-height:120px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:14px;padding:16px 18px;font-family:var(--font);font-size:0.92rem;line-height:1.7;color:var(--text);resize:vertical;outline:none;transition:all 0.2s;}
+textarea:focus{border-color:var(--rose-soft);background:rgba(232,96,122,0.04);box-shadow:0 0 0 3px rgba(232,96,122,0.08);}
+textarea::placeholder{color:var(--dim);font-style:italic;}
+.upload-zone{border:2px dashed rgba(255,255,255,0.1);border-radius:14px;padding:40px 20px;text-align:center;cursor:pointer;position:relative;transition:all 0.2s;background:rgba(255,255,255,0.02);}
+.upload-zone:hover,.upload-zone.drag{border-color:var(--rose-soft);background:rgba(232,96,122,0.04);}
+.upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.upload-icon{font-size:2.2rem;margin-bottom:10px;}
+.upload-zone p{font-size:0.85rem;color:var(--muted);line-height:1.6;}
+.upload-zone strong{color:var(--rose);}
+.preview-img{display:none;width:100%;border-radius:12px;margin-top:14px;max-height:220px;object-fit:cover;border:1px solid var(--border);}
+.error-box{background:rgba(232,96,122,0.08);border:1px solid rgba(232,96,122,0.25);border-radius:12px;padding:12px 16px;color:var(--rose);font-size:0.85rem;margin-top:12px;display:none;}
+
+/* BTN */
+.btn-gen{width:100%;padding:17px;background:linear-gradient(135deg,#e8607a 0%,#c04060 50%,#a888d8 100%);background-size:200% 200%;color:white;border:none;border-radius:16px;font-family:var(--font);font-size:0.95rem;font-weight:600;cursor:pointer;transition:all 0.25s;box-shadow:0 8px 30px rgba(232,96,122,0.3);margin-top:4px;animation:up 0.8s 0.25s cubic-bezier(.16,1,.3,1) both;}
+.btn-gen:hover{transform:translateY(-2px);box-shadow:0 14px 40px rgba(232,96,122,0.45);}
+.btn-gen:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+/* THINKING */
+.thinking{display:none;text-align:center;padding:60px 20px;animation:up 0.4s ease both;}
+.t-ring{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,#e8607a,#a888d8);display:flex;align-items:center;justify-content:center;font-size:1.8rem;margin:0 auto 20px;animation:breathe 2s ease-in-out infinite;}
+.t-dots{display:flex;justify-content:center;gap:8px;margin-bottom:16px;}
+.t-dot{width:8px;height:8px;border-radius:50%;animation:pulse 1.4s ease-in-out infinite;}
+.t-dot:nth-child(1){background:var(--rose);} .t-dot:nth-child(2){background:var(--lavender);animation-delay:0.2s;} .t-dot:nth-child(3){background:var(--gold);animation-delay:0.4s;}
+@keyframes pulse{0%,80%,100%{transform:scale(1);opacity:0.4;}40%{transform:scale(1.6);opacity:1;}}
+.t-msg{font-family:var(--serif);font-style:italic;font-size:1.1rem;color:var(--muted);margin-bottom:6px;}
+.t-sub{font-size:0.74rem;color:var(--dim);}
+
+/* RESULTS */
+.results{animation:up 0.5s ease both;}
+.health-card{border-radius:16px;padding:20px 24px;margin-bottom:16px;border:1px solid;position:relative;overflow:hidden;}
+.health-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.health-ok{background:rgba(120,184,144,0.08);border-color:rgba(120,184,144,0.25);}
+.health-ok::before{background:linear-gradient(90deg,var(--sage),#50d890);}
+.health-warning{background:rgba(224,184,112,0.08);border-color:rgba(224,184,112,0.25);}
+.health-warning::before{background:linear-gradient(90deg,var(--gold),#f0d060);}
+.health-alert{background:rgba(232,96,122,0.08);border-color:rgba(232,96,122,0.25);}
+.health-alert::before{background:linear-gradient(90deg,var(--rose),#ff4060);}
+.health-header{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.health-icon{font-size:1.2rem;}
+.health-label{font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+.health-ok .health-label{color:var(--sage);} .health-warning .health-label{color:var(--gold);} .health-alert .health-label{color:var(--rose);}
+.health-text{font-size:0.9rem;line-height:1.65;color:var(--muted);}
+
+.advice-card{background:rgba(168,136,216,0.07);border:1px solid rgba(168,136,216,0.2);border-radius:16px;padding:20px 24px;margin-bottom:16px;position:relative;overflow:hidden;}
+.advice-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--lavender),var(--rose));}
+.advice-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.advice-label{font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--lavender);}
+.advice-text{font-family:var(--serif);font-style:italic;font-size:1rem;line-height:1.75;color:#c0a8e0;}
+
+.ethical-card{background:rgba(224,184,112,0.06);border:1px solid rgba(224,184,112,0.18);border-radius:14px;padding:16px 20px;margin-bottom:24px;}
+.ethical-head{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.ethical-label{font-size:0.65rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--gold);}
+.ethical-text{font-size:0.85rem;line-height:1.65;color:#b09060;font-style:italic;}
+
+.section-label{font-size:0.68rem;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--dim);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border);}
+
+.cards{display:grid;gap:14px;}
+.r-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:22px 24px;transition:all 0.2s;animation:up 0.4s ease both;position:relative;overflow:hidden;}
+.r-card::before{content:'';position:absolute;top:0;left:0;bottom:0;width:3px;border-radius:18px 0 0 18px;}
+.r-card:hover{border-color:var(--border-glow);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.3);}
+
+.c-romantic::before{background:linear-gradient(180deg,#e8607a,#c04060);}
+.c-sweet::before{background:linear-gradient(180deg,#f0a0b8,#e8607a);}
+.c-mature::before{background:linear-gradient(180deg,#e0b870,#c09040);}
+.c-creative::before{background:linear-gradient(180deg,#a888d8,#7860b0);}
+.c-direct::before{background:linear-gradient(180deg,#78b890,#50906c);}
+.c-casual::before{background:linear-gradient(180deg,#88c0d8,#5090b0);}
+.c-sorry::before{background:linear-gradient(180deg,#d888a8,#b06080);}
+.c-declare::before{background:linear-gradient(180deg,#e8a060,#c07840);}
+.c-reconquer::before{background:linear-gradient(180deg,#c888e8,#9060c0);}
+
+.card-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.c-emoji{font-size:1.1rem;}
+.c-type{font-size:0.68rem;font-weight:700;letter-spacing:2px;text-transform:uppercase;}
+.c-romantic .c-type{color:#e8607a;} .c-sweet .c-type{color:#f0a0b8;} .c-mature .c-type{color:#e0b870;}
+.c-creative .c-type{color:#a888d8;} .c-direct .c-type{color:#78b890;} .c-casual .c-type{color:#88c0d8;}
+.c-sorry .c-type{color:#d888a8;} .c-declare .c-type{color:#e8a060;} .c-reconquer .c-type{color:#c888e8;}
+.c-text{font-size:0.95rem;line-height:1.75;color:#d0c0d8;}
+.c-foot{display:flex;justify-content:flex-end;margin-top:16px;}
+.btn-copy{padding:7px 18px;border:1px solid rgba(255,255,255,0.1);border-radius:10px;background:transparent;color:var(--muted);font-family:var(--font);font-size:0.75rem;font-weight:500;cursor:pointer;transition:all 0.2s;}
+.btn-copy:hover{border-color:var(--rose-soft);color:var(--rose);} .btn-copy.ok{border-color:var(--sage);color:var(--sage);}
+.btn-reset{display:block;margin:32px auto 0;padding:12px 36px;border:1px solid rgba(255,255,255,0.1);border-radius:14px;background:transparent;color:var(--muted);font-family:var(--font);font-size:0.85rem;font-weight:500;cursor:pointer;transition:all 0.2s;}
+.btn-reset:hover{border-color:var(--rose-soft);color:var(--rose);}
+footer{text-align:center;margin-top:60px;padding-top:24px;border-top:1px solid var(--border);}
+footer p{font-family:var(--serif);font-style:italic;font-size:0.88rem;color:var(--dim);}
+footer strong{color:var(--rose-soft);font-style:normal;}
+@keyframes up{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@media(max-width:480px){.name-row,.type-grid{grid-template-columns:1fr;} .aria-name{font-size:2rem;}}
+</style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+<div class="bg-grid"></div>
+<div class="wrap">
+
+<header>
+  <div class="aria-ring">🕊️<div class="online-dot"></div></div>
+  <div class="aria-name">ARIA</div>
+  <div class="aria-sub">Inteligência Amorosa · v2</div>
+  <p class="aria-quote">"Não te dou só palavras bonitas. Dou-te palavras verdadeiras — porque o amor real merece isso."</p>
+  <div class="badges">
+    <span class="badge b-rose">❤️ Honestidade</span>
+    <span class="badge b-gold">✦ Fé & Espiritualidade</span>
+    <span class="badge b-sage">🌿 Respeito</span>
+    <span class="badge b-lav">🧠 Inteligência Emocional</span>
+  </div>
+</header>
+
+<!-- NAMES -->
+<div class="panel-card" style="animation-delay:0.05s">
+  <div class="step-label"><span>👤</span> Personalização (opcional)</div>
+  <div class="name-row">
+    <div class="name-field">
+      <label>O teu nome</label>
+      <input type="text" id="myName" placeholder="ex: João, Maria…">
+    </div>
+    <div class="name-field">
+      <label>Nome de quem amas</label>
+      <input type="text" id="theirName" placeholder="ex: Ana, Pedro…">
+    </div>
+  </div>
+</div>
+
+<!-- TYPE -->
+<div class="panel-card" style="animation-delay:0.1s">
+  <div class="step-label"><span>💡</span> Que tipo de situação é?</div>
+  <div class="type-grid">
+    <button class="type-btn active" data-type="general" onclick="selectType(this)">
+      <div class="type-emoji">💬</div>
+      <div class="type-name">Situação geral</div>
+      <div class="type-desc">Qualquer coisa do coração</div>
+    </button>
+    <button class="type-btn" data-type="casual" onclick="selectType(this)">
+      <div class="type-emoji">🥰</div>
+      <div class="type-name">Carinho casual</div>
+      <div class="type-desc">Saudades, bom dia, "pensei em ti"</div>
+    </button>
+    <button class="type-btn" data-type="sorry" onclick="selectType(this)">
+      <div class="type-emoji">🙏</div>
+      <div class="type-name">Pedir desculpa</div>
+      <div class="type-desc">Errei e quero resolver com amor</div>
+    </button>
+    <button class="type-btn" data-type="declare" onclick="selectType(this)">
+      <div class="type-emoji">💘</div>
+      <div class="type-name">Declarar amor</div>
+      <div class="type-desc">É a primeira vez que vou dizer</div>
+    </button>
+    <button class="type-btn" data-type="reconquer" onclick="selectType(this)">
+      <div class="type-emoji">🔥</div>
+      <div class="type-name">Reconquistar</div>
+      <div class="type-desc">Quero recuperar o que perdi</div>
+    </button>
+    <button class="type-btn" data-type="respond" onclick="selectType(this)">
+      <div class="type-emoji">💌</div>
+      <div class="type-name">Responder a algo</div>
+      <div class="type-desc">Não sei o que dizer a isto</div>
+    </button>
+  </div>
+</div>
+
+<!-- INPUT -->
+<div class="panel-card" id="inputCard" style="animation-delay:0.15s">
+  <div class="step-label"><span>✍️</span> Conta à ARIA</div>
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('text')">✍️ Escrever</button>
+    <button class="tab" onclick="switchTab('image')">📸 Captura de ecrã</button>
+  </div>
+  <div class="panel active" id="panel-text">
+    <textarea id="textInput" placeholder="Descreve à vontade… A ARIA vai entender e responder com o coração. 🕊️"></textarea>
+  </div>
+  <div class="panel" id="panel-image">
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" id="fileInput" accept="image/*" onchange="handleFile(event)">
+      <div class="upload-icon">📱</div>
+      <p><strong>Clica ou arrasta</strong> a captura de ecrã<br><small>PNG · JPG · WEBP</small></p>
+    </div>
+    <img id="previewImg" class="preview-img" alt="">
+  </div>
+  <div class="error-box" id="errBox"></div>
+</div>
+
+<button class="btn-gen" id="genBtn" onclick="generate()">🕊️ Pedir orientação à ARIA</button>
+
+<!-- THINKING -->
+<div class="thinking" id="thinkingBlock">
+  <div class="t-ring">🕊️</div>
+  <div class="t-dots"><div class="t-dot"></div><div class="t-dot"></div><div class="t-dot"></div></div>
+  <div class="t-msg" id="tMsg">ARIA está a sentir a situação…</div>
+  <div class="t-sub" id="tSub">A analisar · avaliar · escolher as palavras certas</div>
+</div>
+
+<!-- RESULTS -->
+<div class="results" id="resultsBlock" style="display:none"></div>
+
+<footer>
+  <p>ARIA não substitui o diálogo real — ela ilumina o caminho.<br><strong>O amor verdadeiro pede coragem.</strong> 🕊️</p>
+</footer>
+</div>
+
+<script>
+let activeTab='text', selectedType='general', imgBase64=null, imgMime='image/jpeg';
+
+const tMessages=[
+  ["A sentir o peso desta situação…","Honestidade · Fé · Respeito pelos limites"],
+  ["A pensar com o coração e a cabeça…","A ARIA nunca te dá palavras vazias"],
+  ["A detectar o tom e a energia disto…","A avaliar o que é saudável para ti"],
+  ["A escolher as palavras com cuidado…","Porque as palavras certas podem mudar tudo"],
+];
+
+function selectType(btn){
+  document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedType=btn.dataset.type;
+}
+
+function switchTab(t){
+  activeTab=t;
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',(i===0&&t==='text')||(i===1&&t==='image')));
+  document.getElementById('panel-text').classList.toggle('active',t==='text');
+  document.getElementById('panel-image').classList.toggle('active',t==='image');
+}
+
+function handleFile(e){
+  const file=e.target.files[0]; if(!file) return;
+  const allowed=['image/jpeg','image/png','image/gif','image/webp'];
+  imgMime=allowed.includes(file.type)?file.type:'image/jpeg';
+  const r=new FileReader();
+  r.onload=ev=>{imgBase64=ev.target.result.split(',')[1];const img=document.getElementById('previewImg');img.src=ev.target.result;img.style.display='block';};
+  r.onerror=()=>showErr('Não consegui ler a imagem. Tenta outra 📸');
+  r.readAsDataURL(file);
+}
+
+const zone=document.getElementById('uploadZone');
+zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag');});
+zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
+zone.addEventListener('drop',e=>{
+  e.preventDefault();zone.classList.remove('drag');
+  const file=e.dataTransfer.files[0];
+  if(file?.type.startsWith('image/')){
+    const dt=new DataTransfer();dt.items.add(file);
+    document.getElementById('fileInput').files=dt.files;
+    handleFile({target:{files:[file]}});
+  }
+});
+
+function showErr(msg){
+  const el=document.getElementById('errBox');
+  el.textContent=msg;el.style.display='block';
+  setTimeout(()=>el.style.display='none',4000);
+}
+
+const typeLabels={general:'situação geral do coração',casual:'mensagem de carinho casual',sorry:'pedido de desculpa amoroso',declare:'declaração de amor pela primeira vez',reconquer:'tentativa de reconquista',respond:'resposta a algo que foi dito'};
+const typeTones={general:'Analisa a situação livremente e adapta o tom.',casual:'Tom leve, quente, descontraído — como uma mensagem genuína de WhatsApp.',sorry:'Tom humilde, sincero, sem exageros — um pedido de desculpa real, não manipulador.',declare:'Tom corajoso mas vulnerável — palavras que saem da alma.',reconquer:'Tom maduro, sem desespero — mostrar crescimento e amor genuíno.',respond:'Analisa o que foi dito e cria respostas que mantenham a conexão.'};
+
+async function generate(){
+  const textVal=document.getElementById('textInput').value.trim();
+  if(activeTab==='text'&&!textVal){showErr('Conta-me a situação primeiro 🕊️');return;}
+  if(activeTab==='image'&&!imgBase64){showErr('Envia uma captura de ecrã 📸');return;}
+
+  const myName=document.getElementById('myName').value.trim();
+  const theirName=document.getElementById('theirName').value.trim();
+  const btn=document.getElementById('genBtn');
+  const thinking=document.getElementById('thinkingBlock');
+  const results=document.getElementById('resultsBlock');
+
+  btn.disabled=true;
+  thinking.style.display='block';
+  results.style.display='none';
+
+  const ph=tMessages[Math.floor(Math.random()*tMessages.length)];
+  document.getElementById('tMsg').textContent=ph[0];
+  document.getElementById('tSub').textContent=ph[1];
+
+  let nameCtx='';
+  if(myName) nameCtx+=`Quem escreve chama-se ${myName}. `;
+  if(theirName) nameCtx+=`A pessoa amada chama-se ${theirName}. `;
+
+  let messages;
+  if(activeTab==='text'){
+    messages=[{role:'user',content:`${nameCtx}Tipo: ${typeLabels[selectedType]}.\n\nSituação: ${textVal}`}];
+  } else {
+    messages=[{role:'user',content:[
+      {type:'image',source:{type:'base64',media_type:imgMime,data:imgBase64}},
+      {type:'text',text:`${nameCtx}Tipo: ${typeLabels[selectedType]}. Lê o texto na imagem e gera as respostas.`}
+    ]}];
+  }
+
+  const hasSpecial=selectedType!=='general';
+
+  const system=`Tu és ARIA — Inteligência Amorosa com personalidade própria, profundidade emocional e valores éticos sólidos.
+
+Identidade: ARIA = Amável, Reflexiva, Íntegra, Autêntica.
+Falas de forma jovem, moderna e calorosa — como uma amiga sábia, não como robô.
+Estilo WhatsApp: direto, com alma, genuíno.
+Valores inquebráveis: HONESTIDADE, FÉ & ESPIRITUALIDADE, RESPEITO PELOS LIMITES.
+
+Tipo de situação: ${typeLabels[selectedType]}
+Tom específico: ${typeTones[selectedType]}
+${myName?`Quem escreve: ${myName}.`:''}${theirName?` Pessoa amada: ${theirName}.`:''}
+
+Gera EXATAMENTE este JSON (sem texto extra):
+{
+  "health_status": "ok ou warning ou alert",
+  "health_emoji": "emoji que representa a saúde da situação",
+  "health_label": "ex: Situação saudável / Atenção aqui / Sinal de alarme",
+  "health_message": "1-2 frases honestas e amorosas sobre a saúde emocional desta situação",
+  "advice": "Conselho pessoal da ARIA — 2-3 frases na primeira pessoa, como amiga sábia, linguagem moderna e calorosa",
+  "ethical_thought": "1-2 frases do que a ARIA considerou eticamente antes de responder",
+  "romantic": "resposta apaixonada, poética mas real",
+  "sweet": "resposta terna, carinhosa, acolhedora",
+  "mature": "resposta equilibrada, honesta, emocionalmente inteligente",
+  "creative": "resposta original, surpreendente, com personalidade",
+  "direct": "resposta curta, afectuosa, vai direto ao coração"${hasSpecial?`,\n  "special": "a melhor resposta possível especificamente para '${typeLabels[selectedType]}' — a que a ARIA recomenda mais para este tipo exato de situação"`:''}
+}
+
+REGRA: Nunca sugires manipulação, mentiras ou que a pessoa se anule. Se a situação for tóxica, sê honesta mesmo que doa.`;
+
+  try {
+    const res=await fetch('/api/aria',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1500,system,messages})});
+    const data=await res.json();
+    if(data.error) throw new Error(data.error.message);
+    const raw=data.content?.map(i=>i.text||'').join('');
+    const clean=raw.replace(/```json|```/g,'').trim();
+    const parsed=JSON.parse(clean);
+    renderResults(parsed);
+  } catch(err){
+    console.error('ARIA error:',err);
+    thinking.style.display='none';
+    btn.disabled=false;
+    showErr('ARIA não conseguiu responder. Verifica a ligação e tenta novamente 🕊️');
+  }
+}
+
+const baseCards=[
+  {key:'romantic',emoji:'🌹',label:'Romântica',cls:'c-romantic'},
+  {key:'sweet',emoji:'🌸',label:'Doce & Carinhosa',cls:'c-sweet'},
+  {key:'mature',emoji:'🌿',label:'Madura & Honesta',cls:'c-mature'},
+  {key:'creative',emoji:'✨',label:'Criativa',cls:'c-creative'},
+  {key:'direct',emoji:'💬',label:'Directa',cls:'c-direct'},
+];
+
+const specialDefs={
+  casual:{emoji:'🥰',label:'Carinho Casual — ARIA recomenda',cls:'c-casual'},
+  sorry:{emoji:'🙏',label:'Pedido de Desculpa — ARIA recomenda',cls:'c-sorry'},
+  declare:{emoji:'💘',label:'Declaração de Amor — ARIA recomenda',cls:'c-declare'},
+  reconquer:{emoji:'🔥',label:'Reconquista — ARIA recomenda',cls:'c-reconquer'},
+  respond:{emoji:'💌',label:'Resposta Ideal — ARIA recomenda',cls:'c-creative'},
+};
+
+function renderResults(d){
+  const thinking=document.getElementById('thinkingBlock');
+  const results=document.getElementById('resultsBlock');
+  const btn=document.getElementById('genBtn');
+  thinking.style.display='none';
+  btn.disabled=false;
+
+  let specialHtml='';
+  if(d.special&&selectedType!=='general'){
+    const s=specialDefs[selectedType]||{emoji:'⭐',label:'Recomendada pela ARIA',cls:'c-creative'};
+    specialHtml=`
+      <div class="section-label">⭐ Resposta especial da ARIA</div>
+      <div class="cards" style="margin-bottom:24px">
+        <div class="r-card ${s.cls}" style="border-color:rgba(232,96,122,0.35);box-shadow:0 0 24px rgba(232,96,122,0.12)">
+          <div class="card-head"><span class="c-emoji">${s.emoji}</span><span class="c-type">${s.label}</span></div>
+          <div class="c-text">${esc(d.special)}</div>
+          <div class="c-foot"><button class="btn-copy" onclick="doCopy(this,'${escA(d.special)}')">Copiar</button></div>
+        </div>
+      </div>`;
+  }
+
+  const cardsHtml=baseCards.map((c,i)=>!d[c.key]?'':`
+    <div class="r-card ${c.cls}" style="animation-delay:${i*0.07}s">
+      <div class="card-head"><span class="c-emoji">${c.emoji}</span><span class="c-type">${c.label}</span></div>
+      <div class="c-text">${esc(d[c.key])}</div>
+      <div class="c-foot"><button class="btn-copy" onclick="doCopy(this,'${escA(d[c.key])}')">Copiar</button></div>
+    </div>`).join('');
+
+  const hClass='health-'+(d.health_status||'ok');
+  results.innerHTML=`
+    <div class="health-card ${hClass}">
+      <div class="health-header"><span class="health-icon">${d.health_emoji||'💚'}</span><span class="health-label">${esc(d.health_label||'')}</span></div>
+      <div class="health-text">${esc(d.health_message||'')}</div>
+    </div>
+    <div class="advice-card">
+      <div class="advice-head"><span style="font-size:1rem">🧠</span><span class="advice-label">Conselho da ARIA</span></div>
+      <div class="advice-text">${esc(d.advice||'')}</div>
+    </div>
+    <div class="ethical-card">
+      <div class="ethical-head"><span style="font-size:0.9rem">✦</span><span class="ethical-label">O que a ARIA considerou</span></div>
+      <div class="ethical-text">${esc(d.ethical_thought||'')}</div>
+    </div>
+    ${specialHtml}
+    <div class="section-label">💌 Todas as respostas</div>
+    <div class="cards">${cardsHtml}</div>
+    <button class="btn-reset" onclick="resetAll()">↩ Nova situação</button>`;
+
+  results.style.display='block';
+  results.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function doCopy(btn,txt){
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent='✓ Copiado!';btn.classList.add('ok');
+    setTimeout(()=>{btn.textContent='Copiar';btn.classList.remove('ok');},2000);
+  });
+}
+
+function resetAll(){
+  document.getElementById('resultsBlock').style.display='none';
+  document.getElementById('textInput').value='';
+  document.getElementById('previewImg').style.display='none';
+  imgBase64=null;imgMime='image/jpeg';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function escA(s){return(s||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/\n/g,' ');}
+</script>
+</body>
+</html>
